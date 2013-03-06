@@ -57,7 +57,7 @@ set undofile                          "undo même après avoir fermé le fichier
 map  <F2>  :s/^\(.*\)$/#\1/g<CR>  "Uncomment selected Block thats commented with #'s"
 map  <F3>  :s/^#//g<CR>
 map  <F4>  :make 
-
+map  <F5> :!%<
 map  <F6>  :noh<CR>
 nmap <F7> <ESC>:call LoadSession()<CR>
 map  <F8>  :mksession!<CR>
@@ -70,6 +70,18 @@ inoremap <Tab> <C-R>=MyTabOrComplete()<CR>
 
 cmap w!! %!sudo tee > /dev/null %
 imap jj <ESC>
+
+map <S-u> gT
+map <S-i> gt
+map <S-j> <S-C-W><S-C-W>
+map <S-k> <C-W>W
+
+map <C-h> <C-W><
+map <C-j> <C-W>-
+map <C-k> <C-W>+
+map <C-l> <C-W>>
+
+map tt :tabnew<CR>
 
 autocmd BufRead   *.*         set nohlsearch
 autocmd BufRead   *.c,*.h     set ft=c 	        "filetype c quand fichier c"
@@ -129,5 +141,3 @@ let &showbreak='└─> '
 "colorscheme zenburn
 colorscheme oceandeep
 set background=dark
-
-map <F5> :!%<
