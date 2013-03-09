@@ -1,0 +1,158 @@
+#!/bin/bash
+
+# Last modified: 2011 Dec 14
+# Version 0.9
+
+# Author: Florian CROUZAT <contact@floriancrouzat.net>
+# Feel free to do whatever you want with this file.
+# Just make sure to credit what deserve credits.
+
+# Arg(s): $1 - Arte+7 html URL of the page used to actually see the video.
+
+# VARIABLES AND FUNCTIONS
+BAD=$'\e[31;01m'
+GOOD=$'\e[32;01m'
+WARN=$'\e[33;01m'
+HILITE=$'\e[36;01m'
+NORMAL=$'\e[0m'
+function die() {
+   echo " ${BAD}*${NORMAL} $@" > /dev/stderr
+   # Try to clean up mktemp
+   rm $xmlinit $xmlfr $xmlde $xmls &>/dev/null
+   exit 1
+}
+# END OF VARIABLES AND FUNCTIONS
+
+# I need a single arg
+[[ -n $1 ]] && echo || die "Usage: $0 http://videos.arte.tv/url-of-the-page-used-to-watch-the-video.html"
+
+# Will I be able to download things ?
+wget=false
+curl=false
+if type -p wget &>/dev/null ; then
+   get="wget -q -O"
+   wget=true
+elif type -p curl &>/dev/null ; then
+   get="curl -s -o"
+   curl=true
+else
+   die "This script ${HILITE}require${NORMAL} wget or curl."
+fi
+
+# Creating tempfiles to temporary store XMLs
+xmlinit=$(mktemp /tmp/xmlinitXXXXX) || die "Cannot create temporary file 1/4 using mktemp. Exiting."
+xmls=$(mktemp /tmp/xmlsXXXXX) || die "Cannot create temporary file 2/4 using mktemp. Exiting."
+xmlfr=$(mktemp /tmp/xmlfrXXXXX) || die "Cannot create temporary file 3/4 using mktemp. Exiting."
+xmlde=$(mktemp /tmp/xmldeXXXXX) || die "Cannot create temporary file 4/4 using mktemp. Exiting."
+
+# This is where the real stuff begins
+# It's a three step parsing. It requires multiple hop to get to the rtmp URL.
+# Sometimes, Arte delivers gzipped webpages, we have to take care of that too...
+
+###########
+# Step 1/3
+# Parses the first page and search the link for the second page
+
+echo -e "Parsing $1 ..."
+if $wget ; then
+   wget -q -O "$xmlinit" "$1"
+elif $curl ; then
+   curl -s -o "$xmlinit" "$1"
+fi
+
+# zgrep handles gzipped and plain text files the same so ...
+step1=$(zgrep -E -o 'videorefFileUrl = "http://[^ ]*"' "$xmlinit" | awk '{print $3}' | tr -d '"')
+
+# Have we found what we are looking for ?
+[[ -z $step1 ]] && die "Parsing error: no \"videorefFileUrl\" found. Exiting"
+
+# End of step 1
+################
+
+#########
+# Step 2
+# Parse the second page and search for two new pages: FR and DE
+
+echo -e " $GOOD*$NORMAL Now parsing $step1 ..."
+$get "$xmls" "$step1"
+
+# zgrep handles gzipped and plain text files the same so ...
+fr=$(zgrep -E "<video lang=\"fr\" ref=\"[^ ]*\" ?/>" $xmls | cut -d= -f3 | sed 's,/>,,' | tr -d '"')
+de=$(zgrep -E "<video lang=\"de\" ref=\"[^ ]*\" ?/>" $xmls | cut -d= -f3 | sed 's,/>,,' | tr -d '"')
+
+# Have we found what we are looking for ?
+[[ -z $fr && -z $de ]] && die "Parsing error: no \"<video ref=\" found. Exiting"
+echo -e " $GOOD*$NORMAL Found FR XML file: $fr ..."
+echo -e " $GOOD*$NORMAL Found DE XML file: $de ..."
+
+# End of step 2
+################
+
+#########
+# Step 3
+# Parse FR and DE page and search for RTMP links.
+
+$get $xmlfr "$fr"
+$get $xmlde "$de"
+
+echo -e " $GOOD*$NORMAL Now parsing $fr ..."
+# zgrep handles gzipped and plain text files the same so ...
+rtmp[1]=$(zgrep -F '"sd"' $xmlfr | egrep -o "rtmp://[^ <]*")
+rtmp[2]=$(zgrep -F '"hd"' $xmlfr | egrep -o "rtmp://[^ <]*")
+
+echo -e " $GOOD*$NORMAL Now parsing $de ..."
+# zgrep handles gzipped and plain text files the same so ...
+rtmp[3]=$(zgrep -F '"sd"' $xmlde | egrep -o "rtmp://[^ <]*")
+rtmp[4]=$(zgrep -F '"hd"' $xmlde | egrep -o "rtmp://[^ <]*")
+
+echo
+echo -e "Found 4 RTMP streams..."
+echo -e " $GOOD*$NORMAL [1] French Standard-definition RTMP (${HILITE}FR_SD${NORMAL})"
+echo -e "     -> ${rtmp[1]}"
+echo -e " $GOOD*$NORMAL [2] French High-definition RTMP (${HILITE}FR_HD${NORMAL})"
+echo -e "     -> ${rtmp[2]}"
+echo -e " $GOOD*$NORMAL [3] German Standard-definition RTMP (${HILITE}DE_SD${NORMAL})"
+echo -e "     -> ${rtmp[3]}"
+echo -e " $GOOD*$NORMAL [4] German High-definition RTMP (${HILITE}DE_HD${NORMAL})"
+echo -e "     -> ${rtmp[4]}"
+
+rm $xmlinit $xmlfr $xmlde $xmls # Cleaning mktemp
+
+# End of step 3
+################
+
+if type -p rtmpdump &>/dev/null ; then
+
+   echo
+   echo -n "Found rtmpdump, please paste the ${HILITE}number${NORMAL} of the above rtmp stream you want to transcode: "
+   read -r whichrtmp
+   [[ $whichrtmp =~ ^[1-4]$ ]] || die "Please enter a valid number (between 1 and 4). Exiting."
+
+   echo -n "Choose a name to save the transcribed FLV: "
+   read -r flv
+   [[ -z $flv ]] && flv="rip$$"
+   flv="${flv}.flv"
+
+   echo
+   echo " $WARN*$NORMAL I'll now enter in a 'while !completely_downloaded; do ... done' loop to transcode the rtmp stream into flv." > /dev/stderr
+   echo " $WARN*$NORMAL It means that ^C won't be able to stop the script, if you really want to abort the processus," > /dev/stderr
+   echo " $WARN*$NORMAL just use ^Z then 'kill %1' to kill the backgrounded job (or use ps(1), or another terminal)." > /dev/stderr
+   echo
+   echo -n "Press any key to start transcoding ... "
+   read
+
+   # Sometimes, the download isn't possible in one single try but the good thing
+   # is that the return code when the download is incomplete is 2 so one can
+   # loop until return code is 0
+   ok=false
+   rtmpdump -r "${rtmp[$whichrtmp]}" -o "$flv" && ok=true
+   while ! $ok ; do
+   	rtmpdump -r "${rtmp[$whichrtmp]}" -o "$flv" --resume && ok=true
+   done
+else
+   echo
+   echo "${BAD}*${NORMAL} Sorry, ${HILITE}rtmpdump${NORMAL} hasn't been found in your \$PATH." > /dev/stderr
+   echo "${BAD}*${NORMAL} I cannot automagically transcode the rtmp ${HILITE}stream${NORMAL} into a flv ${HILITE}file${NORMAL} without this tool." > /dev/stderr
+   echo "${BAD}*${NORMAL} Note that you still can save the rtmp link for future usage or to be used with another transcoding tool." > /dev/stderr
+   exit 0
+fi

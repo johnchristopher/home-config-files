@@ -1,0 +1,20 @@
+#! /usr/bin/python
+import sys
+import os
+
+if (len (sys.argv) < 2):
+	print "error:no url given"
+
+url        = sys.argv[1]
+output_dir = url.split("/")[-1]
+#os.system("wget " + url + " -nv -A.jpg,.jpg,.png,.gif,.bmp -c -H -erobots=off -r -nd -Dimages.4chan.org -P " + output_dir)
+os.system("wget " + url +\
+                " -nv \
+                  -A.jpg,.jpg,.png,.gif,.bmp \
+                  -c \
+                  -H \
+                  -erobots=off \
+                  -r \
+                  -nd \
+                  -Dimages.4chan.org \
+                  -P " + output_dir)

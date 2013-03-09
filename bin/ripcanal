@@ -1,0 +1,78 @@
+#! /bin/bash
+#
+# ripcanal.sh 
+# version 0.5
+# regexes didn't recognize capital letters (HD and MP4)
+# version 0.4
+# change output filename extension from original mp4 to flv. Transcoded file
+# is not an mp4 file.
+# version 0.3
+# - simplified a regex:
+# cat $xml_file|\
+#   sed "s/</\n</gi"|\
+#   sed "s/>/>\n/gi"\
+#   > $xml_file
+# cat $xml_file|\
+#   sed -E "s/(<[^>]*>)/\n\1\n/g"
+#   > $xml_file
+#   
+# version 0.2
+# - fixed a bug where a video wouldn't be found because the video name
+#   can be video_H or video_HD
+# version 0.1
+# - initial version
+# 
+# This script downloads a video from the canal+ website by manipulating
+# a given URL in the form:
+#   http://www.canalplus.fr/../pid1830-c-zapping.html?vid=743320
+#
+# It is intended so far to work only with "Le zapping". Might work for
+# other videos.
+#
+# Pieces of information about the video are stored in a XML file
+# on the canal+ website. The URL of the video flux is in this file.
+# The name of this XML file is the same as the vid argument
+# at the end of the URL of the webpage where we would watch the video
+# if we were using a browser.
+#
+# The generic xml file URL:
+#   http://service.canal-plus.com/video/rest/getVideos/cplus/
+#
+# We download this XML file to extract the video URL which is a RTMP flux.
+#
+# We then use rtmpdump.exe to transcode and save the video to the local
+# filesytem.
+#
+
+id=`echo "$1"|
+  sed -E "s/.*=(.*)$/\1/"`
+echo "Video id            :$id"
+
+xml_file=`mktemp`
+wget "http://service.canal-plus.com/video/rest/getVideos/cplus/$id" \
+     -O "$xml_file"
+
+# The xml file has no CR/LF so we need to add some in order to "parse" it 
+# later. Let's add some CR/LF after and before each tag.
+new_xml_file=`mktemp`
+echo "Nouveau fichier XML:$new_xml_file"
+cat "$xml_file"|
+  sed -E "s/(<[^>]*>)/\n\1\n/g" \
+  > "$new_xml_file"
+
+# We only want HD (three versions of the same file are available).
+# It may be named video_HD or video_H.
+#rtmp_address=`grep -Ei "rtmp.*video_HD?\.mp4" "$xml_file"`
+#rtmp_address=`grep -E "rtmp.*video_H\.mp4" "$xml_file"`
+#rtmp_address=`grep -E "rtmp.*video_HD\.MP4" "$xml_file"`
+rtmp_address=`grep -Ei "rtmp.*video_HD\.MP4" "$new_xml_file"`
+echo "Adresse du flux RTMP:$rtmp_address"
+
+# We use the same original name for the ouput file but we change
+# the extension from mp4/MP4 to flv.
+output_filename=`echo "$rtmp_address"|
+                   sed -E "s/.*\/(.*)/\1/"|
+                   sed -E "s/\.mp4/\.flv/i"`
+echo "Fichier enregistré:$output_filename"
+
+rtmpdump -r "$rtmp_address" -o "$output_filename"

@@ -1,0 +1,202 @@
+#! /bin/bash
+#
+# Changelog
+# =========
+# 1.7:  - copy images from the tmp folder to a folder in the current
+#         directory since cygwin /tmp folder doesn't play nice with zip
+# 1.6:  - don't change current directory anymore.
+#         download pictures in a temp folder, zip them to a file
+#         in the current working directory
+# 1.5:  - change current directory to Manga/. Hard-coded.
+#
+
+NORMAL="\\033[0;39m"
+RED="\\033[1;31m"
+GREEN="\\033[1;32m"
+BLUE="\\033[1;34m"
+
+thisscript=`dirname "$0"`/`basename "$0"`
+
+download_chapter()
+{
+  chapterpage=`mktemp`
+  pageslist=`mktemp`
+  imgpage=`mktemp`
+  downloaddir=`mktemp -d`
+  wget $OPTARG -q -O "$chapterpage"
+  chapter_title=`grep "h1" "$chapterpage"|sed "s/<\/*h1>//gi"`
+  manga_title=`grep "h2.*title.*" "$chapterpage"|
+                 sed "s/^.*title=\"//"|
+                 sed "s/\".*$//"`
+  grep "\/.*option.*" "$chapterpage"|
+    sed "s/^.*value=\"//"|
+    sed "s/\".*$//"|
+    sed "s/^/http:\/\/www\.mangareader\.net/" > "$pageslist"
+  numberofpages=`cat "$pageslist"|wc -l`
+  if [ "$numberofpages" -lt 1 ]; then
+    display_error 2
+    exit 1
+  fi
+  echo -ne "# Downloading $GREEN$chapter_title$NORMAL (?/$numberofpages)"
+  currentpage=1
+  for LINE in `cat "$pageslist"`
+  do
+    wget "$LINE" -q -O "$imgpage"
+    echo -ne "\r# Downloading $GREEN$chapter_title$NORMAL "
+    echo -ne "($currentpage/$numberofpages)"
+    grep ".*id=\"img" "$imgpage"|
+      sed "s/^.*src=\"//"|
+      sed "s/\".*$//"|
+      sed "s/^[^\http].*$//"|
+      wget -i - -q -c -P "$downloaddir"
+    let currentpage+=1
+  done
+  #mv "$downloaddir" ./mrtest
+  #downloaddir="./mrtest"
+  echo ""
+  echo -e "# -> Compressing to $BLUE$chapter_title.cbz$NORMAL"
+  zip -jrq0 "$chapter_title.cbz" "$downloaddir"
+  rm "$imgpage" "$pageslist" "$chapterpage"
+  rm "$downloaddir" -r
+}
+
+download_last_chapter()
+{
+  chapterlist=`mktemp`
+  # toujours moyen de faire plus court avec des one-liners mais on perd
+  # de la flexibilité (vérification des pages qui ne retournent pas
+  # de chapitres par exemple)
+  #"$thisscript" -g $OPTARG|
+  #  tail -n1\
+  #  > "$chapterlist"
+  #if [ `cat "$chapterlist"|wc -l` -lt 1 ]; then
+  #  display_error 3
+  #  exit 1
+  #fi
+  #xargs -a "$chapterlist" -I % "$thisscript" -d %
+  "$thisscript" -g $OPTARG|
+    tail -n1 \
+    > "$chapterlist"
+  "$thisscript" -r "$chapterlist"
+  rm "$chapterlist"
+}
+
+download_all_chapters()
+{
+  chapterlist=`mktemp`
+# pourrait être plus court en n'utilisant pas run_job
+# mais on perd l'affichage du "Download batch" et la
+# vérification contre les pages html sans chapitres
+  "$thisscript" -g $OPTARG|
+    sort -uV \
+    > "$chapterlist"
+  "$thisscript" -r "$chapterlist"
+  rm "$chapterlist"
+  echo ""
+}
+
+get_chapter_list()
+{
+  wget -qO- $OPTARG|
+    grep "^<a href.*"|
+    sed "s/^<a href=\"/http:\/\/www.mangareader.net/"|
+    sed "s/\">.*$//"
+}
+
+run_batch_job()
+{
+  numberofjobs=`cat $OPTARG|wc -l`
+  if [ $numberofjobs -lt 1 ]; then
+    display_error 4
+    exit 1
+  fi
+  echo -en "# Batch download: "$numberofjobs" chapter(s)\n\n"
+  xargs -a $OPTARG -I % "$thisscript" -d %
+}
+
+display_usage()
+{
+  echo "mangareader: option manquante"
+  echo "Utilisation : mangareader [OPTION] [ARGUMENT]"
+  echo "Essayez mangareader -h pour plus d'informations."
+}
+
+display_help()
+{
+  echo "mangareader 1.5, script permettant de télécharger sur mangareader.net"
+  echo "Utilisation : mangareader [option] <url>"
+  echo "-a URL        télécharge tous les chapitres situés à l'URL"
+  echo "-d URL        télécharge le chapitre situé à l'URL"
+  echo "-g URL        affiche une liste des URLs de chaque chapitres de l'URL"
+  echo "-l URL        télécharge le dernier chapitre situé à l'URL"
+  echo "-r FICHIER    télécharge les chapitre d'une liste contenue dans FICHIER"
+  echo ""
+  echo "-h            affiche cet écran d'aide"
+  echo ""
+  echo "Note:"
+  echo "Les arguments sont mutuellement exclusifs."
+  echo "FICHIER est une liste d'URLs séparées par un retour à la ligne."
+}
+
+display_error()
+{
+  case $1 in
+    0)
+      echo "Option invalide: -"$OPTARG
+      ;;
+    1)
+      echo "Option -$OPTARG a besoin d'un argument"
+      ;;
+    2)
+      echo -e "$RED""No pages found... check URL or option""$NORMAL"
+      ;;
+    3)
+      echo -e "$RED""No last chapter... check URL or option""$NORMAL"
+      ;;
+    4)
+      echo -e "$RED""No chapters to download... check URL or option""$NORMAL"
+      ;;
+  esac
+}
+
+if test -z "$1"; then
+  display_usage
+  exit 1
+fi
+
+while getopts ":d:g:r:l:a:h" opt; do
+  case $opt in
+    a) # --download-all-chapters
+      download_all_chapters
+      exit 1
+      ;;
+    d) # --download-chapter
+      download_chapter
+      exit 1
+      ;;
+    l) # --download-last-chapter
+      download_last_chapter
+      exit 1
+      ;;
+    g) # --get-chapter-list
+      get_chapter_list
+      exit 1
+      ;;
+    r) # --run-batch-job
+      run_batch_job
+      exit 1
+      ;;
+    \?) # error: invalid option
+      display_error 0
+      exit 1
+      ;;
+    :) # error: missing argument
+      display_error 1
+      exit 1
+      ;;
+    h) # --help
+      display_help
+      exit 1
+      ;;
+  esac
+done

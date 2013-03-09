@@ -1,0 +1,29 @@
+#! /bin/sh
+#
+
+page=`mktemp`
+wget -q $1 -O $page
+pagetitle=`cat $page|
+          sed -e "s/</<\n/gi"|grep "span class=\"subject\""|
+          head -1|
+          sed -e "s/span class=\"subject\">//"|
+          sed -e "s/<//"|
+          sed -e "s/\s/_/gi"|
+          sed -e "s/:/_/gi"|
+          sed -e "s/\!/_/gi"|
+          sed -e "s/\//_/gi"`
+pageid=`echo $1|
+        sed -e "s/^.*\///"`
+test -z "$pagetitle" && outputdir="$pageid" || outputdir="$pageid"_"$pagetitle"
+rm "$page"
+
+wget $1 \
+    -nv \
+    -A.jpg,.jpg,.png,.gif,.bmp \
+    -c \
+    -H \
+    -erobots=off \
+    -r \
+    -nd \
+    -Dimages.4chan.org \
+    -P "$outputdir"
