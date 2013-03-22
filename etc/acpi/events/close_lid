@@ -1,0 +1,6 @@
+# /etc/acpi/events/close_lid
+# This is called when the user closes the lid and calls
+# /etc/acpi/close_lid.sh for further processing.
+
+event=button[ /]lid
+action=/etc/acpi/sleep.sh
