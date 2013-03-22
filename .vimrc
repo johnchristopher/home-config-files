@@ -87,6 +87,7 @@ autocmd BufRead   *.*         set nohlsearch
 autocmd BufRead   *.c,*.h     set ft=c 	        "filetype c quand fichier c"
 autocmd BufRead   *.lua       set ft=lua
 autocmd BufRead   *.txt       set ft=markdown
+autocmd BufRead   *.md        set ft=markdown
 autocmd BufRead   *.markdown  set ft=markdown
 "autocmd BufEnter  *.txt       set background=light"
 "autocmd BufEnter  *.markdown  set background=light"
