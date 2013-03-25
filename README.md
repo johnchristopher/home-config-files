@@ -5,11 +5,11 @@
 # Audio
 
     ~ $ sudo adduser jeankri audio
-    ~ $ sudo shutdown -r now
+    ~ $ sudo alsa reload
 
 # ACPI
 
-    ~ $ cp ~/home-config-files/acpid /etc -r
+    ~ $ sudo cp ~/home-config-files/acpid /etc -r
     ~ $ sudo service acpid restart
 
 # Network
