@@ -36,10 +36,8 @@ alias ls='ls -hF --color=tty'                 # classify files in colour
 alias ll='ls -l'                              # long list
 alias la='ls -A'                              # all but . and ..
 
-alias reprisea="uniq reprisea.txt|xargs -I % achan_s %"
 alias reprise="uniq reprise.txt|xargs -I % pchan_s %"
-
-alias torrent="aria2c --enable-dht --dht-entry-point=dht.transmissionbt.com:6881 --seed-ratio=0.1 --max-overall-upload-limit=20K --enable-dht6=false --disable-ipv6=true"
+alias reprisea="uniq reprisea.txt|xargs -I % achan_s %"
 
 alias fehd="feh -dFSName"
 
