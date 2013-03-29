@@ -142,3 +142,28 @@ let &showbreak='└─> '
 "colorscheme zenburn
 colorscheme oceandeep
 set background=dark
+
+"set statusline=%F%m%r%h%w\ 
+"set statusline+=[%{strlen(&fenc)?&fenc:&enc}]
+"set statusline+=\ [line\ %l\/%L]
+function! HighlightSearch()
+  if &hls
+    return 'H'
+  else
+    return ''
+  endif
+endfunction
+
+
+hi StatusLine ctermfg=231  ctermbg=16
+set laststatus=2
+set statusline=
+set statusline+=\ %<%F\                                 "File+path
+set statusline+=\ %y\                                   "FileType
+set statusline+=\ %{''.(&fenc!=''?&fenc:&enc).''}       "Encoding
+set statusline+=\ %{(&bomb?\",BOM\":\"\")}\             "Encoding2
+set statusline+=\ %{&ff}\                               "FileFormat (dos/unix..) 
+set statusline+=\ %{&spelllang}\ %{HighlightSearch()}\  "Spellanguage & Highlight on?
+set statusline+=\ %=\ row:%l/%L\                        "Rownumber/total (%)
+set statusline+=\ col:%03c\                             "Colnr
+set statusline+=\ \ %m%r%w\                             "Modified? Readonly? Top/bot.
