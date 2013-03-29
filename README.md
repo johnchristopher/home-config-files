@@ -40,7 +40,7 @@ ou
 
 # Permissions par défaut des nouveaux utilisateurs
 
-Changer `umask=?` en `umask=077` dans `/etc/logins.def` et dans `~/.profile`
+  Changer `umask=?` en `umask=077` dans `/etc/logins.def` et dans `~/.profile`
 
 # Disable Useless services
 
