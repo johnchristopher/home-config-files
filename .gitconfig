@@ -1,9 +1,11 @@
 [user]
 	name = johnchristopher
-  email = johnchristopherinternet@gmail.com
+	email = johnchristopherinternet@gmail.com
 [credential]
 	helper = cache --timeout=36000
 [core]
 	editor = vim
 [merge]
 	tool = vimdiff
+[color]
+	ui = true
