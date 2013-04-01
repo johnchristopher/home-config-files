@@ -156,8 +156,17 @@ endfunction
 
 
 hi StatusLine ctermfg=231  ctermbg=16
+"hi User2 ctermfg=#000000  ctermbg=#F4905C
+"hi User3 ctermfg=#292b00  ctermbg=#f4f597
+"hi User4 ctermfg=#112605  ctermbg=#aefe7B
+"hi User5 ctermfg=#051d00  ctermbg=#7dcc7d
+"hi User6 ctermfg=#ffffff  ctermbg=#880c0e gui=bold
+"hi User7 ctermfg=#ffffff  ctermbg=#5b7fbb
+"hi User8 ctermfg=#ffffff  ctermbg=#810085
+"hi User0 ctermfg=#ffffff  ctermbg=#094afe
 set laststatus=2
 set statusline=
+"set statusline+=\[%n]                                  "buffernr
 set statusline+=\ %<%F\                                 "File+path
 set statusline+=\ %y\                                   "FileType
 set statusline+=\ %{''.(&fenc!=''?&fenc:&enc).''}       "Encoding
@@ -166,4 +175,4 @@ set statusline+=\ %{&ff}\                               "FileFormat (dos/unix..)
 set statusline+=\ %{&spelllang}\ %{HighlightSearch()}\  "Spellanguage & Highlight on?
 set statusline+=\ %=\ row:%l/%L\                        "Rownumber/total (%)
 set statusline+=\ col:%03c\                             "Colnr
-set statusline+=\ \ %m%r%w\                             "Modified? Readonly? Top/bot.
+"set statusline+=%0*\ \ %m%r%w\ %P\ \                   "Modified? Readonly? Top/bot.
