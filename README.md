@@ -1,11 +1,13 @@
 # Système de base
 
-    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra alsa-utils screen gnuplot rproject qpdfview aria2c unrar comix sshfs rtmpdump git source-highlight python-feedparser unattended-upgrade software-properties-common ranger
+    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra gnuplot r-base aria2c unrar comix sshfs rtmpdump git source-highlight software-properties-common ranger
 
 # Audio
 
     ~ $ sudo adduser jeankri audio
     ~ $ sudo alsa reload
+
+! Canal est muted par défaut.
 
 # ACPI
 
