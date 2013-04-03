@@ -1,6 +1,6 @@
 # Système de base
 
-    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra gnuplot r-base aria2c unrar comix sshfs rtmpdump git source-highlight software-properties-common ranger dia zip
+    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra gnuplot r-base aria2c unrar comix sshfs rtmpdump git source-highlight software-properties-common ranger dia zip irssi pcmanfm
 
 # Audio
 
