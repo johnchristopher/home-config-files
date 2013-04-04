@@ -56,3 +56,7 @@ ou
 # Faenza
 
     ~ $ sudo add-apt-repository http://ppa.launchpad.net/tiheum/equinox/ubuntu && apt-get update && apt-get install faenza-icon-theme
+
+# Geary
+
+    ~ $ sudo add-apt-repository ppa:yorba/ppa && sudo apt-get update && sudo apt-get install geary
