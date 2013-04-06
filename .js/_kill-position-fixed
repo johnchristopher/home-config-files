@@ -1,0 +1,6 @@
+$('div,a').css('position',
+  function (index, value) {
+    if (value == 'fixed')
+      return 'static'
+    }
+) 
