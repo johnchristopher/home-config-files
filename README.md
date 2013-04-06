@@ -60,3 +60,9 @@ ou
 # Geary
 
     ~ $ sudo add-apt-repository ppa:yorba/ppa && sudo apt-get update && sudo apt-get install geary
+
+# Skype
+
+    ~ $ sudo apt-get install libxss libqtwebkit4
+    ~ $ sudo dpkg -i skype.deb
+    ~ $ sudo skype # to init /dev/video0 (??)
