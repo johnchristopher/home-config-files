@@ -1,6 +1,6 @@
 # Système de base
 
-    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra gnuplot r-base aria2c unrar comix sshfs rtmpdump git source-highlight software-properties-common ranger dia zip irssi pcmanfm
+    ~ $ sudo apt-get install wicd-curses vim acpid xorg xinit awesome xterm evince vlc alsa-tools feh pm-utils moc mc xfonts-terminus console-terminus alsa-utils screen awesome-extra gnuplot r-base aria2c unrar comix sshfs rtmpdump git source-highlight software-properties-common ranger dia zip irssi pcmanfm irssi nmap
 
 # Audio
 
@@ -8,6 +8,7 @@
     ~ $ sudo alsa reload
 
 ! Canal est muted par défaut.
+! Idem pour capture.
 
 # ACPI
 
@@ -66,3 +67,10 @@ ou
     ~ $ sudo apt-get install libxss libqtwebkit4
     ~ $ sudo dpkg -i skype.deb
     ~ $ sudo skype # to init /dev/video0 (??)
+
+
+Peut-être installer puis désinstaller camorama et guvcview.
+
+# irc
+
+    ~ $ sudo apt-get install python-irclib
