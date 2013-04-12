@@ -74,3 +74,42 @@ Peut-être installer puis désinstaller camorama et guvcview.
 # irc
 
     ~ $ sudo apt-get install python-irclib
+
+# Bluetooth
+
+## Installation
+
+    ~ $ apt-get install bluetooth obexfs
+    ~ # usermod -aG fuse <user>
+
+##  Configuration
+
+    ~ $ service bluetooth status
+    ~ $ bluetooth-agent <PIN>
+
+Connecter via le menu bluetooth du téléphone avec le <PIN>.
+
+Si le téléphone ne voit pas l'ordinateur:
+
+    ~ # hcitool scan
+    ~ # rfcomm connect hci0 <MAC-ADDRESS>
+
+Ou:
+
+    ~ # dbus-send --system --dest=org.bluez /org/bluez/hci0 org.bluez.Adapter.SetMode string:discoverable
+
+## Utilisation
+
+    ~ # mount -t fuse "obexfs#-b<MAC-ADDRESS>" /media/phone/
+
+##  Gérer le hardware
+
+    ~ # hciconfig hci0
+    ~ # hciconfig hci0 down
+    ~ # modprobe btusb
+    ~ # hciconfig hci0 up
+    ~ # rmmod btusb
+
+http://dev.zuckschwerdt.org/openobex/wiki/ObexFs
+http://wiki.debian.org/fr/BluetoothUser
+https://answers.launchpad.net/ubuntu/+source/bluez/+question/51440
