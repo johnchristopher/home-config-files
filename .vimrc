@@ -71,8 +71,8 @@ inoremap <Tab> <C-R>=MyTabOrComplete()<CR>
 cmap w!! %!sudo tee > /dev/null %
 imap jj <ESC>
 
-map <S-u> gT
-map <S-i> gt
+"map <S-u> gT
+"map <S-i> gt
 map <S-j> <S-C-W><S-C-W>
 map <S-k> <C-W>W
 
