@@ -46,9 +46,9 @@ set showmode 		    "affiche le mode dans la ligne de statut"
 set showmatch 		  "met en évidence les parenthèses"
 "set number 		    "pas beau""
 
-set backupdir=/$HOME/.back-up/vim
-set directory=/$HOME/.back-up/vim/tmp
-set undodir=/$HOME/.back-up/vim/tmp
+set backupdir=$HOME/.back-up/vim
+set directory=$HOME/.back-up/vim/tmp
+set undodir=$HOME/.back-up/vim/tmp
 set undofile                          "undo même après avoir fermé le fichier"
 
 """"""""""""""""""""""""""""""""
