@@ -1,0 +1,24 @@
+#! /bin/sh
+#
+
+page=`mktemp`
+wget -q $1 -O $page
+pagetitle=`grep head.*title $page|
+          sed -e 's/<head><title>//gi'|
+          sed -e 's/<\/title><\/head>//gi'|
+          sed -e "s/\s/_/gi"|
+          sed -e "s/:/_/gi"|
+          sed -e "s/\!/_/gi"|
+          sed -e "s/\//_/gi"`
+pageid=`echo $1|
+        sed -e "s/^.*\///"|
+        sed -e "s/\.html.*//"`
+test -z "$pagetitle" && outputdir="$pageid" || outputdir="$pageid"_"$pagetitle"
+
+grep javascript $page|
+  grep javascript|
+  grep expandimg|
+  sed -e 's/" onclick.*//gi'|
+  sed 's/^.*="//gi'|
+  xargs -I % wget -c -nv -P "$outputdir" %
+rm "$page"
